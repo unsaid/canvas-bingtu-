@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>根据数据绘制饼图-带文字提示</title>
+	<style>
+		canvas {
+			border: 1px solid #000;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="600" height="400"></canvas>
+</body>
+<script>
+	function toAngle( radian ) {
+		return 180 * radian / Math.PI;
+	}
+	function toRadian( angle ) {
+		return Math.PI * angle / 180;
+	}
+	var canvas = document.getElementById('canvas'),
+		ctx = canvas.getContext('2d');
+
+	var canvasWidth = canvas.width;
+	var canvasHeight = canvas.height;
+
+	var data = [
+		{title: 'IE', value: 140},
+		{title: 'GC', value: 500},
+		{title: 'FF', value: 200},
+		{title: 'QQ', value: 80},
+		{title: 'LieBao', value: 180}
+	];
+
+	// 1: 求样本总数
+	var sum = 0;
+	data.forEach(function(v) {
+		sum += v.value;
+	});
+	console.log(sum);
+	var start = -Math.PI / 2;
+	var colors ="mediumseagreen,mediumslateblue,mediumspringgreen,mediumturquoise,mediumvioletred,midnightblue".split(',');
+
+	var x, y;
+	// 遍历data数据
+	data.forEach(function(v, i) {
+		ctx.beginPath();
+		ctx.moveTo(canvasWidth / 2, canvasHeight / 2);
+		ctx.arc(canvasWidth / 2, canvasHeight / 2, 150, 
+						start, start + 2 * Math.PI * v.value / sum);	
+		ctx.fillStyle = colors[i];	
+		ctx.fill();
+
+		var lineAngle = start + Math.PI * v.value / sum;
+		// 求点坐标
+		x = Math.cos(lineAngle) * 180;
+		y = Math.sin(lineAngle) * 180;
+		// 点坐标变换
+		x = canvasWidth / 2 + x;
+		y = canvasHeight / 2 + y;
+		// 绘制文字的指示线
+		ctx.beginPath();
+		ctx.moveTo(canvasWidth / 2, canvasHeight / 2);
+		ctx.lineTo(x, y);
+		// 如果lineAngle大于Math.PI / 2
+		// 文字水平向右对齐	
+		if(lineAngle > Math.PI / 2){
+			x = x - 28;
+			ctx.lineTo(x, y);
+			ctx.textAlign = "right";
+		} else {
+			// 如果lineAngle大于Math.PI / 2
+			// 文字水平向左对齐
+			x = x + 28;
+			ctx.lineTo(x, y);
+			ctx.textAlign = "left";
+		}
+		ctx.strokeStyle = colors[i];
+		ctx.stroke();
+		// 下一个扇形的起始弧度
+		// 即当前start 累加 当前数据所占用的弧度
+		start += 2 * Math.PI * v.value / sum;	
+		// 绘制文本
+		ctx.textBaseline = "middle";
+		ctx.fillText(data[i].title, x, y);	
+	});
+</script>
+</html>
